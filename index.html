@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#003087">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Seguimiento Capacitación | Farmatodo</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --ft-blue: #003087;
+            --ft-cyan: #00b5e2;
+            --ft-white: #ffffff;
+            --ft-gray: #f8fafc;
+            --ft-text: #0f172a;
+            --accent-pink: #e91e63;
+            --gold: #fbbf24;
+            --silver: #d1d5db;
+            --bronze: #d97706;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--ft-gray);
+            color: var(--ft-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Figuras Animadas de Fondo */
+        .shape {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+            pointer-events: none;
+        }
+
+        .pill-shape {
+            width: clamp(80px, 15vw, 150px);
+            height: clamp(40px, 8vw, 60px);
+            background: var(--ft-blue);
+            border-radius: 50px;
+        }
+
+        .circle-shape {
+            width: clamp(60px, 12vw, 100px);
+            height: clamp(60px, 12vw, 100px);
+            background: var(--ft-cyan);
+            border-radius: 50%;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(clamp(50px, 10vw, 100px), clamp(50px, 10vw, 100px)) rotate(120deg); }
+            66% { transform: translate(clamp(-25px, -5vw, -50px), clamp(100px, 20vw, 200px)) rotate(240deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Encabezado responsive */
+        header {
+            background: var(--ft-blue);
+            color: white;
+            padding: clamp(2rem, 5vw, 4rem) 1rem;
+            text-align: center;
+            border-bottom: clamp(4px, 2vw, 8px) solid var(--ft-cyan);
+            border-radius: 0 0 clamp(20px, 5vw, 50px) clamp(20px, 5vw, 50px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.8rem, 7vw, 4rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 0.9;
+            letter-spacing: -1px;
+        }
+
+        .pill-badge {
+            display: inline-block;
+            background: var(--ft-cyan);
+            padding: clamp(0.5rem, 2vw, 0.6rem) clamp(1rem, 4vw, 2rem);
+            border-radius: 50px;
+            font-weight: 800;
+            margin-top: clamp(0.8rem, 3vw, 1.5rem);
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            letter-spacing: 1px;
+            color: var(--ft-blue);
+        }
+
+        /* Usuario logueado */
+        .user-status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: none;
+        }
+
+        .user-status.active {
+            display: block;
+        }
+
+        /* Container y timeline optimizadas */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: clamp(1rem, 4vw, 2rem) clamp(0.5rem, 3vw, 1rem);
+            width: 100%;
+            flex: 1;
+        }
+
+        .timeline {
+            position: relative;
+            padding: clamp(1rem, 4vw, 2rem) 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: #cbd5e1;
+            transform: translateX(-50%);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before { 
+                left: clamp(15px, 5vw, 30px);
+                width: 3px;
+            }
+        }
+
+        .item {
+            position: relative;
+            margin-bottom: clamp(2rem, 5vw, 3rem);
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .dot {
+            width: clamp(25px, 6vw, 35px);
+            height: clamp(25px, 6vw, 35px);
+            background: white;
+            border: clamp(5px, 1.5vw, 8px) solid var(--ft-blue);
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 48, 135, 0.3);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .dot { 
+                left: clamp(10px, 5vw, 30px);
+                width: clamp(20px, 5vw, 30px);
+                height: clamp(20px, 5vw, 30px);
+                border-width: 4px;
+            }
+        }
+
+        /* Tarjetas responsive */
+        .content-card {
+            background: white;
+            padding: clamp(1.5rem, 5vw, 2.5rem);
+            border-radius: clamp(15px, 4vw, 25px);
+            width: 44%;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+        }
+
+        .item:nth-child(even) .content-card { 
+            margin-left: auto; 
+            border-right: clamp(5px, 2vw, 10px) solid var(--ft-cyan);
+        }
+
+        .item:nth-child(odd) .content-card { 
+            margin-right: auto; 
+            border-left: clamp(5px, 2vw, 10px) solid var(--ft-blue);
+        }
+
+        @media (max-width: 768px) {
+            .item { 
+                padding-left: clamp(40px, 12vw, 70px);
+                margin-bottom: clamp(1.5rem, 4vw, 2rem);
+            }
+            .content-card { 
+                width: 100% !important; 
+                border-right: none !important; 
+                border-left: clamp(5px, 2vw, 10px) solid var(--ft-blue) !important; 
+                padding: clamp(1.2rem, 4vw, 2rem);
+            }
+        }
+
+        .content-card:hover {
+            transform: scale(1.05);
+            border-color: var(--ft-cyan);
+            box-shadow: 0 20px 40px rgba(0, 48, 135, 0.15);
+        }
+
+        @media (max-width: 480px) {
+            .content-card:hover {
+                transform: scale(1.02);
+            }
+        }
+
+        .owner {
+            color: var(--ft-blue);
+            font-weight: 800;
+            font-size: clamp(0.7rem, 2vw, 1rem);
+            text-transform: uppercase;
+            margin-bottom: clamp(0.4rem, 2vw, 0.8rem);
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: 800;
+            color: var(--ft-text);
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.2;
+        }
+
+        /* Modales responsive */
+        .view-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--ft-white);
+            z-index: 2000;
+            display: none;
+            padding: clamp(1rem, 4vw, 2rem);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex-direction: column;
+        }
+
+        .view-overlay.active { 
+            display: flex; 
+            animation: slideUp 0.5s forwards;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .btn-close {
+            background: var(--ft-blue);
+            color: white;
+            border: none;
+            padding: clamp(0.8rem, 3vw, 1.2rem) clamp(1.5rem, 5vw, 3rem);
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            cursor: pointer;
+            transition: 0.3s;
+            align-self: center;
+            margin-bottom: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        .btn-close:hover {
+            background: var(--ft-cyan);
+            color: var(--ft-blue);
+            transform: scale(1.05);
+        }
+
+        /* MODAL DE REGISTRO */
+        .registration-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .registration-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .registration-card {
+            background: white;
+            padding: clamp(2rem, 5vw, 3rem);
+            border-radius: clamp(15px, 4vw, 30px);
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.4s forwards;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .registration-card h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--ft-blue);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            color: var(--ft-text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: clamp(0.8rem, 2vw, 1rem);
+            border: 2px solid #cbd5e1;
+            border-radius: clamp(8px, 2vw, 12px);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--ft-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 181, 226, 0.1);
+        }
+
+        .btn-register {
+            width: 100%;
+            background: linear-gradient(135deg, var(--ft-blue), var(--ft-cyan));
+            color: white;
+            border: none;
+            padding: clamp(1rem, 2vw, 1.2rem);
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 48, 135, 0.3);
+        }
+
+        /* Contenedor de juego */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1.5rem, 4vw, 2.5rem);
+            padding-bottom: clamp(1rem, 5vw, 2rem);
+        }
+
+        .game-card {
+            background: white;
+            padding: clamp(1.5rem, 4vw, 2rem);
+            border-radius: clamp(15px, 4vw, 25px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji-display {
+            font-size: clamp(3rem, 12vw, 5rem);
+            margin-bottom: clamp(1rem, 4vw, 2rem);
+            display: block;
+            animation: bounce 2s infinite;
+            text-align: center;
+            line-height: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(clamp(-5px, -2vw, -10px)); }
+        }
+
+        .option-btn {
+            background: white;
+            border: 3px solid #cbd5e1;
+            color: var(--ft-text);
+            padding: clamp(1rem, 3vw, 1.5rem);
+            border-radius: clamp(12px, 3vw, 20px);
+            cursor: pointer;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: 700;
+            transition: all 0.2s;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--ft-blue);
+            background: #eff6ff;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 480px) {
+            .option-btn:hover:not(:disabled) {
+                transform: translateY(-1px);
+            }
+        }
+
+        .option-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1rem, 3vw, 2rem);
+            width: 100%;
+        }
+
+        @media (max-width: 480px) {
+            .option-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: clamp(0.8rem, 2vw, 1rem);
+            }
+        }
+
+        .correct { 
+            background: #15803d !important; 
+            color: white !important; 
+            border-color: #166534 !important;
+        }
+
+        .wrong { 
+            background: #b91c1c !important; 
+            color: white !important; 
+            border-color: #991b1b !important;
+        }
+
+        .wrong-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(185, 28, 28, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(4rem, 15vw, 12rem);
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border-radius: clamp(12px, 3vw, 25px);
+            font-weight: 900;
+        }
+
+        .wrong-overlay.show { 
+            opacity: 1; 
+            z-index: 10;
+        }
+
+        /* RANKING */
+        .ranking-container {
+            background: white;
+            border-radius: clamp(15px, 4vw, 25px);
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            margin: 2rem auto;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-container h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            color: var(--ft-blue);
+            text-align: center;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .ranking-item.first {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border: 3px solid #d97706;
+        }
+
+        .ranking-item.second {
+            background: linear-gradient(135deg, #d1d5db, #9ca3af);
+            color: white;
+            border: 3px solid #6b7280;
+        }
+
+        .ranking-item.third {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: white;
+            border: 3px solid #92400e;
+        }
+
+        .ranking-position {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-right: 1rem;
+            font-weight: 900;
+        }
+
+        .ranking-name {
+            flex: 1;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+
+        .ranking-time {
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            margin-left: 1rem;
+        }
+
+        /* Estilos para modales */
+        #modal-body {
+            text-align: center;
+            max-width: 100%;
+            margin: auto;
+            padding: clamp(1rem, 4vw, 2rem);
+        }
+
+        #modal-body h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(2.5rem, 7vw, 4rem);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        #modal-body p {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        #modal-game h2 {
+            font-family: 'Montserrat';
+            color: var(--ft-blue);
+            font-size: clamp(2rem, 6vw, 3rem);
+            text-align: center;
+            margin-bottom: clamp(1.5rem, 4vw, 2rem);
+            text-transform: uppercase;
+        }
+
+        .timer {
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--ft-cyan);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 600;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Optimización para tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .content-card {
+                width: 50%;
+            }
+        }
+
+        /* Prevenir zoom en inputs */
+        @media (max-width: 480px) {
+            input, select, textarea, button {
+                font-size: 16px;
+            }
+        }
+
+        /* Animación suave en transiciones */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Figuras de movimiento fondo -->
+    <div class="shape pill-shape" style="top: 10%; left: 5%;"></div>
+    <div class="shape circle-shape" style="top: 40%; right: 5%;"></div>
+    <div class="shape pill-shape" style="bottom: 10%; left: 15%; background: var(--ft-cyan);"></div>
+    <div class="shape circle-shape" style="top: 70%; right: 20%;"></div>
+
+    <!-- Estado de usuario -->
+    <div class="user-status" id="userStatus">
+        👤 <span id="userName"></span>
+    </div>
+
+    <header>
+        <h1>REUNIÓN DE SEGUIMIENTO</h1>
+        <div class="pill-badge">CAPACITACIÓN</div>
+    </header>
+
+    <div class="container">
+        <div class="timeline">
+            <!-- Items de la agenda -->
+            <div class="item">
+                <div class="dot"></div>
+                <div class="content-card" onclick="openView('csat')">
+                    <span class="owner">👤 M.U</span>
+                    <div class="title">CSAT Interno</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="dot" style="border-color: var(--ft-cyan);"></div>
+                <div class="content-card" onclick="openView('dashboard')">
+                    <span class="owner">📊 O.O</span>
+                    <div class="title">Dashboard CENCAP</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="dot" style="border-color: var(--ft-cyan);"></div>
+                <div class="content-card" onclick="openView('scrom')">
+                    <span class="owner">🤖 O.O</span>
+                    <div class="title">Scorm con Claude</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="dot" style="border-color: var(--ft-blue);"></div>
+                <div class="content-card" onclick="openView('academia')">
+                    <span class="owner">🏠 Y.P</span>
+                    <div class="title">Avances Academia</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <div class="dot"></div>
+                <div class="content-card" onclick="openView('varios')">
+                    <span class="owner">📝 S. R</span>
+                    <div class="title">Puntos varios</div>
+                </div>
+            </div>
+
+            <!-- Actividad -->
+            <div class="item">
+                <div class="dot" style="border-color: var(--accent-pink); background: var(--accent-pink);"></div>
+                <div class="content-card" onclick="startGame()" style="border-left-color: var(--accent-pink); background: #fff5f8;">
+                    <span class="owner" style="color: var(--accent-pink);">ACTIVIDAD ESPECIAL</span>
+                    <div class="title">ADIVINA LA PELÍCULA 🎬</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REGISTRO -->
+    <div class="registration-modal" id="registrationModal">
+        <div class="registration-card">
+            <h2>¡BIENVENIDO!</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #64748b; font-size: 1.1rem;">
+                Registra tu nombre para participar en la actividad
+            </p>
+            <div class="error-message" id="errorMessage"></div>
+            <form onsubmit="registerUser(event)">
+                <div class="form-group">
+                    <label for="userNameInput">Tu nombre completo:</label>
+                    <input 
+                        type="text" 
+                        id="userNameInput" 
+                        placeholder="Ej: Juan Pérez" 
+                        required
+                        minlength="3"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Tu correo (opcional):</label>
+                    <input 
+                        type="email" 
+                        id="userEmail" 
+                        placeholder="Ej: juan@example.com"
+                    >
+                </div>
+                <button type="submit" class="btn-register">COMENZAR 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <div id="modal-generic" class="view-overlay">
+        <button class="btn-close" onclick="closeView()">VOLVER A LA AGENDA</button>
+        <div id="modal-body"></div>
+    </div>
+
+    <div id="modal-game" class="view-overlay">
+        <button class="btn-close" onclick="closeGameAndShowRanking()">FINALIZAR ACTIVIDAD</button>
+        <h2>¿QUÉ PELÍCULA ES?</h2>
+        <div class="timer" id="timerDisplay"></div>
+        <div class="game-container" id="game-boards"></div>
+    </div>
+
+    <!-- Modal de Ranking -->
+    <div id="modal-ranking" class="view-overlay">
+        <button class="btn-close" onclick="closeView()">VOLVER A LA AGENDA</button>
+        <div class="ranking-container">
+            <h3>🏆 Ranking de Ganadores</h3>
+            <div id="rankingList"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIGURACIÓN ============
+        // Reemplaza esto con la URL de tu webhook o Google Sheets
+        const SHEETS_WEBHOOK_URL = 'https://script.google.com/a/macros/farmatodo.com/s/AKfycbxmL0uklLSgwt194dqp7tjYkmQf5NtAA-jzsQje6Ux5StR5dWa4tZsYvuNUT34gaAB8/exec'; // Cambiar esto
+        
+        // ============ ESTADO GLOBAL ============
+        let currentUser = null;
+        let gameStartTime = null;
+        let userResponses = [];
+        let allParticipants = [];
+
+        const contentData = {
+            'csat': { 
+                title: 'CSAT Interno', 
+                desc: 'Revisión de los indicadores de satisfacción del cliente interno.', 
+                icon: '🌟' 
+            },
+            'dashboard': { 
+                title: 'Dashboard CENCAP', 
+                desc: 'Análisis de métricas de desempeño y cumplimiento de objetivos.', 
+                icon: '📊' 
+            },
+            'scrom': { 
+                title: 'Scorm con Claude', 
+                desc: 'Innovación en contenidos e-learning asistidos por IA.', 
+                icon: '🚀' 
+            },
+            'academia': { 
+                title: 'Avances Academia', 
+                desc: 'Hitos alcanzados y próximos pasos en la Academia Farmatodo.', 
+                icon: '🏢' 
+            },
+            'varios': { 
+                title: 'Puntos varios', 
+                desc: 'Temas diversos y cierre de la jornada.', 
+                icon: '📎' 
+            }
+        };
+
+        const movies = [
+            { emojis: '🦁👑🌅🐵', options: ['Madagascar', 'Tarzán', 'El libro de la selva', 'El Rey León'], correct: 3 },
+            { emojis: '🌊🧊🚢❤️', options: ['Moana', 'Piratas del Caribe', 'La vida de Pi', 'Titanic'], correct: 3 },
+            { emojis: '🦖🏝️🚁', options: ['King Kong', 'Jurassic Park', 'Godzilla', 'Avatar'], correct: 1 },
+            { emojis: '📼🔪📞😱', options: ['Halloween', 'Viernes 13', 'Scream', 'El conjuro'], correct: 2 },
+            { emojis: '🧙‍♂️⚡🏰', options: ['El Señor de los Anillos', 'Percy Jackson', 'Las Crónicas de Narnia', 'Harry Potter'], correct: 3 }
+        ];
+
+        // ============ REGISTRO DE USUARIO ============
+        function registerUser(e) {
+            e.preventDefault();
+            
+            const nameInput = document.getElementById('userNameInput').value.trim();
+            const emailInput = document.getElementById('userEmail').value.trim();
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (nameInput.length < 3) {
+                errorMsg.textContent = 'El nombre debe tener al menos 3 caracteres';
+                errorMsg.classList.add('show');
+                return;
+            }
+
+            currentUser = {
+                name: nameInput,
+                email: emailInput,
+                startTime: new Date(),
+                responses: []
+            };
+
+            // Guardar en localStorage
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Mostrar nombre en la UI
+            document.getElementById('userName').textContent = nameInput;
+            document.getElementById('userStatus').classList.add('active');
+            
+            // Cerrar modal
+            document.getElementById('registrationModal').classList.remove('active');
+            
+            // Enviar al Sheets (asincrónico)
+            sendToSheets('registration', { name: nameInput, email: emailInput, timestamp: new Date().toISOString() });
+        }
+
+        // ============ INICIAR JUEGO ============
+        function startGame() {
+            if (!currentUser) {
+                document.getElementById('registrationModal').classList.add('active');
+                return;
+            }
+
+            gameStartTime = new Date();
+            userResponses = [];
+            initGame();
+            document.getElementById('modal-game').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateTimer();
+        }
+
+        // ============ TIMER ============
+        function updateTimer() {
+            if (!gameStartTime) return;
+            
+            const now = new Date();
+            const elapsed = Math.floor((now - gameStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const timerEl = document.getElementById('timerDisplay');
+            
+            if (timerEl) {
+                timerEl.textContent = display;
+            }
+            
+            // Continuar actualizando si el modal está abierto
+            if (document.getElementById('modal-game').classList.contains('active')) {
+                setTimeout(updateTimer, 1000);
+            }
+        }
+
+        // ============ JUEGO ============
+        function initGame() {
+            const container = document.getElementById('game-boards');
+            container.innerHTML = '';
+            movies.forEach((movie, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="wrong-overlay" id="wrong-${index}">✕</div>
+                    <span class="emoji-display">${movie.emojis}</span>
+                    <div class="option-buttons-grid">
+                        ${movie.options.map((opt, i) => `
+                            <button class="option-btn" onclick="checkAnswer(event, this, ${index}, ${i})">${opt}</button>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function checkAnswer(event, btn, mIdx, sIdx) {
+            event.preventDefault();
+            const movie = movies[mIdx];
+            const buttons = btn.parentElement.querySelectorAll('.option-btn');
+            const timeElapsed = Math.floor((new Date() - gameStartTime) / 1000);
+            
+            if (sIdx === movie.correct) {
+                btn.classList.add('correct');
+                btn.disabled = true;
+                
+                // Registrar respuesta correcta
+                userResponses.push({
+                    movieIndex: mIdx,
+                    isCorrect: true,
+                    timeSeconds: timeElapsed,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Enviar a Sheets
+                if (currentUser) {
+                    sendToSheets('answer', {
+                        userName: currentUser.name,
+                        movieIndex: mIdx,
+                        isCorrect: true,
+                        timeSeconds: timeElapsed
+                    });
+                }
+                
+                confetti({
+                    particleCount: 200,
+                    spread: 90,
+                    origin: { y: 0.6 },
+                    colors: ['#003087', '#00b5e2', '#ffffff']
+                });
+                
+                buttons.forEach(b => b.disabled = true);
+            } else {
+                btn.classList.add('wrong');
+                btn.disabled = true;
+                const overlay = document.getElementById(`wrong-${mIdx}`);
+                overlay.classList.add('show');
+                
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    btn.classList.remove('wrong');
+                    btn.disabled = false;
+                }, 800);
+            }
+            
+            // Verificar si todas fueron respondidas
+            const allAnswered = checkAllAnswered();
+            if (allAnswered) {
+                setTimeout(() => {
+                    showGameComplete();
+                }, 1000);
+            }
+        }
+
+        function checkAllAnswered() {
+            return userResponses.filter(r => r.isCorrect).length === movies.length;
+        }
+
+        function showGameComplete() {
+            const finalTime = Math.floor((new Date() - gameStartTime) / 1000);
+            const message = `¡Completaste en ${Math.floor(finalTime / 60)}:${String(finalTime % 60).padStart(2, '0')}!`;
+            
+            alert(message);
+        }
+
+        // ============ MOSTRAR RANKING ============
+        function closeGameAndShowRanking() {
+            document.getElementById('modal-game').classList.remove('active');
+            
+            // Enviar resultado final
+            if (currentUser && userResponses.length > 0) {
+                const totalTime = Math.floor((new Date() - gameStartTime) / 1000);
+                sendToSheets('final_result', {
+                    userName: currentUser.name,
+                    email: currentUser.email,
+                    totalTime: totalTime,
+                    correctAnswers: userResponses.length,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            // Cargar y mostrar ranking
+            loadRanking();
+        }
+
+        function loadRanking() {
+            // Por ahora, simulamos el ranking. Luego se llenará desde Sheets
+            const rankingData = [
+                { name: 'Cargando...', time: 0 }
+            ];
+            
+            displayRanking(rankingData);
+            
+            // Intentar cargar del servidor
+            fetchRanking();
+        }
+
+        function fetchRanking() {
+            // Aquí iría la llamada para obtener el ranking desde Sheets
+            // Por ahora es solo un placeholder
+        }
+
+        function displayRanking(participants) {
+            const rankingList = document.getElementById('rankingList');
+            rankingList.innerHTML = '';
+            
+            const sorted = participants.sort((a, b) => a.time - b.time);
+            
+            const medalEmojis = ['🥇', '🥈', '🥉'];
+            
+            sorted.slice(0, 10).forEach((participant, index) => {
+                const item = document.createElement('div');
+                const positionClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
+                
+                item.className = `ranking-item ${positionClass}`;
+                item.innerHTML = `
+                    <span class="ranking-position">${medalEmojis[index] || (index + 1) + '.'}</span>
+                    <span class="ranking-name">${participant.name}</span>
+                    <span class="ranking-time">${Math.floor(participant.time / 60)}:${String(participant.time % 60).padStart(2, '0')}</span>
+                `;
+                rankingList.appendChild(item);
+            });
+            
+            document.getElementById('modal-ranking').classList.add('active');
+        }
+
+        // ============ MODALES GENÉRICOS ============
+        function openView(type) {
+            const data = contentData[type];
+            document.getElementById('modal-body').innerHTML = `
+                <div style="font-size: clamp(3rem, 12vw, 6rem); margin-bottom: clamp(1rem, 4vw, 2rem);">${data.icon}</div>
+                <h2 style="color: var(--ft-blue); font-size: clamp(1.8rem, 6vw, 4rem); margin-bottom: clamp(0.8rem, 3vw, 1.5rem); font-family: Montserrat; text-transform: uppercase;">${data.title}</h2>
+                <p style="font-size: clamp(1rem, 3vw, 1.8rem); line-height: 1.6; color: #334155;">${data.desc}</p>
+            `;
+            document.getElementById('modal-generic').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeView() {
+            document.querySelectorAll('.view-overlay').forEach(v => v.classList.remove('active'));
+            document.body.style.overflow = 'auto';
+        }
+
+        // ============ INTEGRACIÓN CON GOOGLE SHEETS ============
+        function sendToSheets(action, data) {
+            const payload = {
+                action: action,
+                ...data
+            };
+
+            // Usar fetch con CORS
+            fetch(SHEETS_WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => {
+                console.log('Datos guardados localmente (Sheets no configurado):', payload);
+                // Guardar en localStorage como backup
+                const logs = JSON.parse(localStorage.getItem('gameLogs') || '[]');
+                logs.push(payload);
+                localStorage.setItem('gameLogs', JSON.stringify(logs));
+            });
+        }
+
+        // ============ INICIALIZACIÓN ============
+        window.addEventListener('load', function() {
+            // Verificar si hay usuario guardado
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userStatus').classList.add('active');
+            } else {
+                // Mostrar modal de registro
+                document.getElementById('registrationModal').classList.add('active');
+            }
+        });
+
+        // Prevenir scroll en iOS cuando están abiertos los modales
+        document.addEventListener('touchmove', function(e) {
+            if (document.querySelector('.view-overlay.active') || 
+                document.querySelector('.registration-modal.active')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
